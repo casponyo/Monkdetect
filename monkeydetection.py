@@ -7,18 +7,19 @@ import numpy as np
 import tflite_runtime.interpreter as tflite
 
 # Setup GPIO pins
-MOTION_SENSOR_PIN = 17
-ULTRASONIC_SPEAKER_PIN = 18
+MOTION_SENSOR_PIN = 4
+
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(MOTION_SENSOR_PIN, GPIO.IN)
-GPIO.setup(ULTRASONIC_SPEAKER_PIN, GPIO.OUT)
 
-# Initialize camera
+
+# Initialize components
 camera = PiCamera()
+pygame.mixer.init()
 
 # Load your TensorFlow Lite model
-interpreter = tflite.Interpreter(model_path='/main/baboon_model.tflite')
+interpreter = tflite.Interpreter(model_path='/home/casper/Monkdetect/baboon_model.tflite')
 interpreter.allocate_tensors()
 
 # Get input and output details
@@ -34,7 +35,7 @@ from_whatsapp_number = 'whatsapp:+16089108025'
 to_whatsapp_number = 'whatsapp:+254716814392'
 
 def capture_image():
-    image_path = '/pi/image.jpg'
+    image_path = '/home/casper/env/Monkdetect/image.jpg'
     camera.capture(image_path)
     return image_path
 
@@ -78,8 +79,7 @@ def main_loop():
                     print("Monkey detected!")
 
                     # Trigger sound at 19kHz for 60 seconds
-                    play_sound('/main/18-19khz.mp3', 60)
-                    time.sleep(30)
+                    play_sound('/home/casper/Monkdetect/18-19khz.mp3', 60)
 
                     # Check motion again
                     if GPIO.input(MOTION_SENSOR_PIN):
@@ -88,15 +88,15 @@ def main_loop():
                             print("Monkey still detected! Upshifting frequency.")
 
                             # Upshift sound to 21kHz for 90 seconds
-                            play_sound('/main/20-21khz.mp3', 90)
-                            time.sleep(30)
+                            play_sound('/home/casper/Monkdetect/20-21khz.mp3', 90)
+                            
 
                             # Check motion again
                             if GPIO.input(MOTION_SENSOR_PIN):
                                 image_path = capture_image()
                                 if analyze_image(image_path):
                                     print("Monkey still detected! Sending distress message.")
-                                    send_whatsapp_message("Baboon detected for over 90 seconds!")
+                                    send_whatsapp_message("Baboon detected")
                 else:
                     print("No monkey detected.")
 
